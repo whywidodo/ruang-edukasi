@@ -1,0 +1,248 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model CourseType {
+  id        Int      @id @default(autoincrement())
+  typeName  String   @map("type_name")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  course    Course[]
+
+  @@map("coursetype")
+}
+
+model CourseCategory {
+  id           Int      @id @default(autoincrement())
+  categoryName String   @map("category_name")
+  imageUrl     String?  @map("image_url")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  course       Course[]
+
+  @@map("coursecategory")
+}
+
+model CourseLevel {
+  id        Int      @id @default(autoincrement())
+  levelName String   @map("level_name")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  course    Course[]
+
+  @@map("courselevel")
+}
+
+model Admin {
+  id            Int       @id @default(autoincrement())
+  fullName      String    @map("full_name")
+  email         String    @unique
+  password      String
+  imageUrl      String?   @map("image_url")
+  phoneNumber   String?   @map("phone_number")
+  city          String?
+  country       String?
+  emailToken    String?   @map("email_token")
+  passwordToken String?   @map("password_token")
+  otpCode       String?   @map("otp_code")
+  otpExpiration DateTime? @map("otp_expiration")
+  status        String?
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  course        Course[]
+
+  @@map("admin")
+}
+
+model Course {
+  id                        Int                         @id @default(autoincrement())
+  instructorName            String                      @map("instructor_name")
+  courseName                String                      @map("course_name")
+  courseDescription         String?                     @map("course_description")
+  imageUrl                  String?                     @map("image_url")
+  price                     BigInt?
+  rating                    Float?
+  telegramLink              String?                     @map("telegram_link")
+  whatsappLink              String?                     @map("whatsapp_link")
+  studentCount              Int?                        @map("student_count")
+  videoCount                Int?                        @map("video_count")
+  readingCount              Int?                        @map("reading_count")
+  contentCount              Int?                        @map("content_count")
+  createdAt                 DateTime                    @default(now()) @map("created_at")
+  updatedAt                 DateTime                    @updatedAt @map("updated_at")
+  CourseType                CourseType?                 @relation(fields: [courseTypeId], references: [id])
+  courseTypeId              Int?                        @map("course_type_id")
+  CourseCategory            CourseCategory?             @relation(fields: [courseCategoryId], references: [id])
+  courseCategoryId          Int?                        @map("course_category_id")
+  CourseLevel               CourseLevel?                @relation(fields: [courseLevelId], references: [id])
+  courseLevelId             Int?                        @map("course_level_id")
+  Admin                     Admin?                      @relation(fields: [adminId], references: [id])
+  adminId                   Int?                        @map("admin_id")
+  courseContent             CourseContent[]
+  courseTarget              CourseTarget[]
+  courseSkill               CourseSkill[]
+  courseReview              CourseReview[]
+  courseCoupon              CourseCoupon[]
+  order                     Order[]
+  userCourseContent         UserCourseContent[]
+  userCourseContentProgress UserCourseContentProgress[]
+
+  @@map("course")
+}
+
+model CourseContent {
+  id                        Int                         @id @default(autoincrement())
+  contentTitle              String?                     @map("content_title")
+  videoLink                 String?                     @map("video_link")
+  readingLink               String?                     @map("reading_link")
+  status                    String?
+  createdAt                 DateTime                    @default(now()) @map("created_at")
+  updatedAt                 DateTime                    @updatedAt @map("updated_at")
+  Course                    Course?                     @relation(fields: [courseId], references: [id])
+  courseId                  Int?                        @map("course_id")
+  userCourseContentProgress UserCourseContentProgress[]
+
+  @@map("coursecontent")
+}
+
+model CourseTarget {
+  id          Int      @id @default(autoincrement())
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  Course      Course?  @relation(fields: [courseId], references: [id])
+  courseId    Int?     @map("course_id")
+
+  @@map("coursetarget")
+}
+
+model CourseSkill {
+  id        Int      @id @default(autoincrement())
+  skillName String?  @map("skill_name")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  Course    Course?  @relation(fields: [courseId], references: [id])
+  courseId  Int?     @map("course_id")
+
+  @@map("courseskill")
+}
+
+model CourseReview {
+  id        Int      @id @default(autoincrement())
+  review    String?
+  rating    Int?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  Course    Course?  @relation(fields: [courseId], references: [id])
+  courseId  Int?     @map("course_id")
+  User      User?    @relation(fields: [userId], references: [id])
+  userId    Int?     @map("user_id")
+
+  @@map("coursereview")
+}
+
+model CourseCoupon {
+  id              Int       @id @default(autoincrement())
+  couponName      String?   @map("coupon_name")
+  couponCode      String?   @map("coupon_code")
+  discountPercent String?   @map("discount_percent")
+  validUntil      DateTime? @map("valid_until")
+  status          String?
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  Course          Course?   @relation(fields: [courseId], references: [id])
+  courseId        Int?      @map("course_id")
+  order           Order[]
+
+  @@map("coursecoupon")
+}
+
+model User {
+  id                        Int                         @id @default(autoincrement())
+  fullName                  String                      @map("full_name")
+  email                     String                      @unique
+  password                  String
+  imageUrl                  String?                     @map("image_url")
+  phoneNumber               String?                     @map("phone_number")
+  city                      String?
+  country                   String?
+  emailToken                String?                     @map("email_token")
+  passwordToken             String?                     @map("password_token")
+  otpCode                   String?                     @map("otp_code")
+  otpExpiration             DateTime?                   @map("otp_expiration")
+  status                    String?
+  createdAt                 DateTime                    @default(now()) @map("created_at")
+  updatedAt                 DateTime                    @updatedAt @map("updated_at")
+  courseReview              CourseReview[]
+  userCourseContent         UserCourseContent[]
+  order                     Order[]
+  userCourseContentProgress UserCourseContentProgress[]
+
+  @@map("user")
+}
+
+model Order {
+  id             Int           @id @default(autoincrement())
+  orderTrx       String?       @unique @map("order_trx")
+  totalPrice     BigInt        @map("total_price")
+  orderDate      DateTime?     @map("order_date")
+  status         String?
+  accountNumber  String?       @map("account_number")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+  Course         Course?       @relation(fields: [courseId], references: [id])
+  courseId       Int?          @map("course_id")
+  CourseCoupon   CourseCoupon? @relation(fields: [courseCouponId], references: [id])
+  courseCouponId Int?          @map("course_coupon_id")
+  User           User?         @relation(fields: [userId], references: [id])
+  userId         Int?          @map("user_id")
+
+  @@map("order")
+}
+
+model UserCourseContent {
+  id          Int      @id @default(autoincrement())
+  courseName  String?  @map("course_name")
+  courseCount Int?     @map("course_count")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  Course      Course?  @relation(fields: [courseId], references: [id])
+  courseId    Int?     @map("course_id")
+  User        User?    @relation(fields: [userId], references: [id])
+  userId      Int?     @map("user_id")
+
+  @@map("usercoursecontent")
+}
+
+model CoursePPN {
+  id        Int      @id @default(autoincrement())
+  ppn       Int
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("courseppn")
+}
+
+model UserCourseContentProgress {
+  id              Int            @id @default(autoincrement())
+  courseName      String?        @map("course_name")
+  status          String?
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+  User            User?          @relation(fields: [userId], references: [id])
+  userId          Int?
+  Course          Course?        @relation(fields: [courseId], references: [id])
+  courseId        Int?
+  CourseContent   CourseContent? @relation(fields: [courseContentId], references: [id])
+  courseContentId Int?
+
+  @@map("usercoursecontentprogress")
+}
